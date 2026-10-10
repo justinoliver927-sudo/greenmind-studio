@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123323">
+<title>GreenMind Studio · Code Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1711;--panel:#12251a;--panel2:#1a3324;--line:#2a4935;--text:#eef7ef;--muted:#a8c1ae;--green:#91e6a7;--ink:#092012;--red:#ff9a9a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:18px 16px 14px;background:linear-gradient(135deg,#173b28,#0d2016);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:13px;background:#2b5a3b;display:grid;place-items:center;color:var(--green);font-size:25px;font-weight:800}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+main{max-width:1050px;margin:auto;padding:14px;display:grid;gap:14px}.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}.cardhead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.cardhead h2{font-size:15px;margin:0}.cardbody{padding:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}button,.filebtn{font:inherit;font-weight:650;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel2);color:var(--text);cursor:pointer}button.primary{background:var(--green);color:var(--ink);border-color:var(--green)}button:active{transform:translateY(1px)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+input,textarea,select{background:#09140e;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit;width:100%}label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.projectrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.tabs{display:flex;gap:6px;overflow:auto;padding:10px 10px 0}.tab{white-space:nowrap}.tab[aria-selected=true]{background:var(--green);color:var(--ink);border-color:var(--green)}
+textarea#editor{display:block;min-height:240px;resize:vertical;border-radius:10px;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.status{font-size:12px;color:var(--muted)}.preview{display:block;width:100%;height:300px;background:white;border:0;border-radius:9px}.console{white-space:pre-wrap;overflow-wrap:anywhere;background:#07100b;border:1px solid var(--line);border-radius:9px;padding:10px;min-height:55px;font:12px/1.5 ui-monospace,monospace;color:#d6f0dc}.diag-summary{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}.diag-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:11px;color:var(--muted)}.diag-pill.pass{color:#a8f0b6;border-color:#38764a}.diag-pill.warn{color:#ffdc91;border-color:#80672f}.diag-pill.fail{color:#ffaaaa;border-color:#874141}
+.hint{font-size:12px;color:var(--muted);margin:8px 0 0}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted);font-size:11px}.ai-output{white-space:pre-wrap;overflow-wrap:anywhere;min-height:90px;max-height:420px;overflow:auto;background:#07100b;border:1px solid var(--line);border-radius:10px;padding:12px}.ai-controls{display:grid;gap:10px}.ai-topline{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.ai-busy{opacity:.7;pointer-events:none}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 25px}
+@media(min-width:760px){main{grid-template-columns:1fr 1fr;align-items:start}.projectcard{grid-column:1/-1}.editorcard{grid-column:1}.previewcard{grid-column:2}.preview{height:440px}textarea#editor{min-height:390px}}
+@media(max-width:480px){main{padding:10px;gap:10px}.cardhead,.cardbody{padding:10px}.actions button{flex:1 1 auto}.projectrow{grid-template-columns:minmax(0,1fr) auto}#projectSelect{min-height:44px}button{min-height:42px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">G</div><div><h1>GreenMind Studio</h1><p>CODE LAB · PHONE-FIRST WORKSPACE</p></div></div></header>
+<main>
+<section class="card projectcard">
+ <div class="cardhead"><h2>My project</h2><span class="pill" id="saveState">Saved on this device</span></div>
+ <div class="cardbody">
+  <label for="projectSelect">Open project</label>
+  <select id="projectSelect" aria-label="Open project"></select>
+  <label for="projectName" style="margin-top:10px">Project name</label>
+  <div class="projectrow"><input id="projectName" value="My first website" maxlength="80"><button id="renameProject">Rename</button></div>
+  <div class="actions" style="margin-top:10px"><button class="primary" id="newProject">＋ New project</button><button id="deleteProject">Delete project</button></div>
+  <div class="actions" style="margin-top:10px"><button class="primary" id="runBtn">▶ Run preview</button><button id="saveBtn">Save</button><button id="downloadBtn">Export files</button><button id="resetBtn">Reset demo</button></div>
+  <p class="hint">Your drafts are saved in this browser on this device. Export files before clearing browser data or changing devices.</p>
+ </div>
+</section>
+<section class="card editorcard">
+ <div class="cardhead"><h2>Code editor</h2><span class="status" id="fileLabel">index.html</span></div>
+ <div class="tabs" role="tablist" aria-label="Code file">
+  <button class="tab" role="tab" data-file="html" aria-selected="true">HTML</button><button class="tab" role="tab" data-file="css" aria-selected="false">CSS</button><button class="tab" role="tab" data-file="js" aria-selected="false">JavaScript</button>
+ </div>
+ <div class="cardbody"><textarea id="editor" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code editor"></textarea>
+ <div class="actions" style="margin-top:9px"><button class="primary" id="checkBtn">Run diagnostics</button><button id="clearConsole">Clear output</button></div><p class="hint">Tip: tap a file tab, edit the code, then run the preview.</p></div>
+</section>
+<section class="card" id="aiCard">
+ <div class="cardhead"><h2>GreenMind AI coding assistant</h2><span class="pill" id="aiConnection">Checking backend…</span></div>
+ <div class="cardbody ai-controls">
+  <p style="margin:0;color:var(--muted)">Ask for explanations, debugging help, or improvement suggestions based on your current project. AI suggestions are shown for review and are never applied automatically.</p>
+  <div><label for="aiAccessPassword">Private workspace access password</label><input id="aiAccessPassword" type="password" autocomplete="current-password" placeholder="Enter the password configured on your backend"><p class="hint">This is your app access password, not your AI API key. It stays in this page's memory and is cleared when you refresh.</p></div>
+  <div><label for="aiMode">What should the assistant do?</label><select id="aiMode"><option value="explain">Explain my code</option><option value="debug">Find bugs and suggest fixes</option><option value="improve">Suggest improvements</option><option value="build">Help me build a feature</option></select></div>
+  <div><label for="aiPrompt">Your question</label><textarea id="aiPrompt" rows="4" maxlength="3000" placeholder="Example: Explain why my button click handler might not work, and suggest a safe fix."></textarea></div>
+  <div class="actions"><button class="primary" id="askAiBtn">Ask GreenMind AI</button><button id="clearAiBtn">Clear answer</button></div>
+  <div><div class="ai-topline"><label for="aiAnswer">Assistant response</label><span class="status" id="aiStatus">Not connected yet</span></div><div class="ai-output" id="aiAnswer" role="status" aria-live="polite">The assistant will report clearly if the backend or AI service is not configured. No fake/demo replies.</div></div>
+  <p class="hint">Privacy: the current project's HTML, CSS, and JavaScript plus your question are sent to your configured backend when you ask. Do not include passwords, private keys, or personal data in project code. AI usage may incur API charges.</p>
+ </div>
+</section>
+
+<section class="card previewcard">
+ <div class="cardhead"><h2>Live preview</h2><span class="status">Sandboxed frame</span></div>
+ <div class="cardbody"><iframe class="preview" id="preview" title="Website preview" sandbox="allow-scripts"></iframe><h2 style="font-size:14px;margin:14px 0 7px">Diagnostics &amp; output</h2><div class="diag-summary" id="diagSummary" aria-label="Diagnostic summary"><span class="diag-pill">Not checked yet</span></div><div class="console" id="console" role="status" aria-live="polite">Ready. Run diagnostics to check HTML, CSS, and JavaScript. Run preview to test browser behavior.</div><p class="hint">Only run code you trust. The preview is isolated from this editor, but browser code may still attempt network requests.</p></div>
+</section>
+<section class="card">
+ <div class="cardhead"><h2>Next up</h2><span class="pill">v0.6 · Secure AI backend</span></div>
+ <div class="cardbody"><p style="margin-top:0">This version works as a browser-based coding playground. It does not need a backend server.</p><ul style="padding-left:20px;color:var(--muted)"><li>HTML, CSS and JavaScript editing</li><li>Sandboxed browser preview</li><li>Local draft saving and file export</li><li>Create, open, rename and delete projects</li><li>HTML structure and duplicate-ID checks</li><li>CSS brace and rule checks</li><li>JavaScript syntax checks without executing the code</li><li>Runtime console and error messages from the preview</li><li>Server-side AI coding assistant (requires private backend configuration)</li><li>AI suggestions require review; no automatic code changes</li></ul><p class="hint">Diagnostics are quick checks, not a complete standards validator. The AI assistant requires HTTPS hosting, a server-side OPENAI_API_KEY, and a GREENMIND_ACCESS_PASSWORD. GitHub Pages alone cannot run this backend.</p></div>
+</section>
+</main><footer>GREENMIND STUDIO · BUILD SMALL · TEST HONESTLY</footer>
+<script>
+(function(){
+"use strict";
+const defaults={
+ html:'<!doctype html>\n<html>\n<body>\n  <h1>Hello, GreenMind!</h1>\n  <p>Edit this page, then run the preview.</p>\n  <button id="hello">Click me</button>\n</body>\n</html>',
+ css:'body { font-family: system-ui, sans-serif; padding: 24px; color: #183b27; }\nh1 { color: #16713a; }\nbutton { padding: 10px 14px; border: 0; border-radius: 8px; background: #16713a; color: white; }',
+ js:'document.querySelector("#hello")?.addEventListener("click", () => {\n  console.log("Hello from GreenMind Studio!");\n  alert("Your JavaScript works!");\n});'
+};
+const editor=document.querySelector("#editor"), fileLabel=document.querySelector("#fileLabel"), output=document.querySelector("#console"), frame=document.querySelector("#preview"), saveState=document.querySelector("#saveState");
+const projectSelect=document.querySelector("#projectSelect"), projectName=document.querySelector("#projectName");
+const fileNames={html:"index.html",css:"style.css",js:"script.js"};
+const key="greenmind-studio-projects-v1", legacyKey="greenmind-studio-codelab-v1";
+let active="html", projects=[], activeId="";
+function makeId(){return "project-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7)}
+function cloneDefaults(){return {html:defaults.html,css:defaults.css,js:defaults.js}}
+function activeProject(){return projects.find(p=>p.id===activeId)||projects[0]}
+function showOutput(s){output.textContent=String(s)}
+function showDiagnosticSummary(results){
+ const host=document.querySelector("#diagSummary");host.textContent="";
+ const counts={PASS:0,WARN:0,FAIL:0};results.forEach(r=>counts[r.level]++);
+ [["PASS",counts.PASS],["WARN",counts.WARN],["FAIL",counts.FAIL]].forEach(([level,count])=>{
+  const pill=document.createElement("span");pill.className="diag-pill "+level.toLowerCase();pill.textContent=level+" · "+count;host.appendChild(pill);
+ });
+}
+function checkHtml(source){
+ const results=[];const text=String(source||"");
+ if(!text.trim())return [{level:"FAIL",file:"HTML",message:"HTML is empty."}];
+ if(!/<!doctype\s+html/i.test(text))results.push({level:"WARN",file:"HTML",message:"No <!doctype html> found; browsers may use quirks mode."});
+ let doc;
+ try{doc=new DOMParser().parseFromString(text,"text/html")}catch(e){return [{level:"FAIL",file:"HTML",message:"Could not parse HTML: "+e.message}]}
+ if(!doc.documentElement)results.push({level:"FAIL",file:"HTML",message:"Missing html root element."});
+ const ids=[...doc.querySelectorAll("[id]")].map(n=>n.id).filter(Boolean);const seen=new Set(),dupes=new Set();ids.forEach(id=>{if(seen.has(id))dupes.add(id);seen.add(id)});
+ if(dupes.size)results.push({level:"FAIL",file:"HTML",message:"Duplicate id attribute(s): "+[...dupes].join(", ")});
+ else results.push({level:"PASS",file:"HTML",message:"No duplicate IDs found."});
+ const missingAlt=[...doc.querySelectorAll("img:not([alt])")].length;
+ if(missingAlt)results.push({level:"WARN",file:"HTML",message:missingAlt+" image(s) missing alt text."});
+ const unlabeled=[...doc.querySelectorAll("input,select,textarea")].filter(el=>el.type!=="hidden"&&!el.labels?.length&&!el.getAttribute("aria-label")&&!el.getAttribute("aria-labelledby")).length;
+ if(unlabeled)results.push({level:"WARN",file:"HTML",message:unlabeled+" form control(s) may need a label."});
+ if(!results.some(r=>r.level==="FAIL"))results.push({level:"PASS",file:"HTML",message:"HTML parsed in the browser's HTML parser."});
+ return results;
+}
+function checkCss(source){
+ const results=[];const text=String(source||"");
+ if(!text.trim())return [{level:"WARN",file:"CSS",message:"CSS is empty; the page will use browser defaults."}];
+ const clean=text.replace(/\/\*[\s\S]*?\*\//g,"");
+ if(/\/\*/.test(clean))results.push({level:"FAIL",file:"CSS",message:"CSS comment appears to be missing its closing */."});
+ const stack=[];let line=1,quote="",escaped=false;
+ for(let i=0;i<clean.length;i++){const ch=clean[i];if(ch==="\n")line++;if(quote){if(escaped)escaped=false;else if(ch==="\\")escaped=true;else if(ch===quote)quote="";continue}if(ch==="\""||ch==="'"){quote=ch;continue}if(ch==="{")stack.push(line);else if(ch==="}"){if(!stack.length){results.push({level:"FAIL",file:"CSS",message:"Unexpected } on line "+line+"."});break}stack.pop()}}
+ if(stack.length)results.push({level:"FAIL",file:"CSS",message:"Missing } for a rule opened on line "+stack[stack.length-1]+"."});
+ if(quote)results.push({level:"FAIL",file:"CSS",message:"Unclosed quoted string."});
+ if(!results.some(r=>r.level==="FAIL")){
+  const rulePattern=/([^{}]+)\{([^{}]*)\}/g;let match, checked=0;
+  while((match=rulePattern.exec(clean))!==null){checked++;const selector=match[1].trim(),body=match[2].trim();if(!selector){results.push({level:"FAIL",file:"CSS",message:"A CSS rule has no selector."});break}if(body&&!body.split(";").every(part=>!part.trim()||part.includes(":"))){results.push({level:"WARN",file:"CSS",message:"A declaration may be missing a colon near selector: "+selector.slice(0,60)});break}}
+  if(!results.some(r=>r.level==="FAIL"))results.push({level:"PASS",file:"CSS",message:"Brace balance looks good; checked "+checked+" rule(s) for basic declaration structure."});
+ }
+ return results;
+}
+function checkJs(source){
+ try{new Function(String(source||""));return [{level:"PASS",file:"JavaScript",message:"Syntax check passed. The code was parsed, not executed."}]}
+ catch(e){return [{level:"FAIL",file:"JavaScript",message:e.name+": "+e.message+". This check does not execute your code."}]}
+}
+function runDiagnostics(){
+ capture();persist();const p=activeProject();if(!p)return;
+ const results=[...checkHtml(p.code.html),...checkCss(p.code.css),...checkJs(p.code.js)];showDiagnosticSummary(results);
+ const lines=["GREENMIND STUDIO · DIAGNOSTICS", "Project: "+p.name, "",...results.map(r=>r.level+" · "+r.file+" · "+r.message),"","Quick checks only. Run the preview and test your buttons and page behavior separately."];
+ showOutput(lines.join("\n"));
+}
+function refreshProjectSelect(){projectSelect.innerHTML="";projects.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;projectSelect.appendChild(o)});projectSelect.value=activeId}
+function loadTab(){const p=activeProject();if(!p)return;editor.value=p.code[active];fileLabel.textContent=fileNames[active];document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.file===active)))}
+function capture(){const p=activeProject();if(p)p.code[active]=editor.value}
+function persist(){
+ capture();
+ const p=activeProject();
+ if(!p)return false;
+ p.name=(projectName.value.trim()||"Untitled project").slice(0,80);
+ projectName.value=p.name;
+ try{localStorage.setItem(key,JSON.stringify({projects,activeId}));refreshProjectSelect();saveState.textContent="Saved on this device";return true}
+ catch(e){saveState.textContent="Could not save";showOutput("Local save failed: "+e.message);return false}
+}
+function escapedInline(s){return JSON.stringify(s).replace(/</g,"\\\\u003c").replace(/\\u2028/g,"\\\\u2028").replace(/\\u2029/g,"\\\\u2029")}
+function buildDoc(){
+ let html=String(activeProject()?.code.html||"").trim();
+ const css=activeProject()?.code.css||"";
+ const jsCode=activeProject()?.code.js||"";
+ const viewport='<meta name="viewport" content="width=device-width,initial-scale=1">';
+ const style='<style>\n'+css+'\n</style>';
+ if(/<head(?:\s[^>]*)?>/i.test(html)){
+   html=html.replace(/<head(?:\s[^>]*)?>/i,m=>m+'\n'+viewport+'\n'+style);
+ }else if(/<html(?:\s[^>]*)?>/i.test(html)){
+   html=html.replace(/<html(?:\s[^>]*)?>/i,m=>m+'\n<head>'+viewport+'\n'+style+'</head>');
+ }else{
+   html='<!doctype html><html><head>'+viewport+'\n'+style+'</head><body>'+html+'</body></html>';
+ }
+ const js=escapedInline(jsCode);
+ const bridge="<script>(function(){const send=(...a)=>parent.postMessage({gmLog:a.map(x=>{try{return typeof x==='string'?x:JSON.stringify(x)}catch(e){return String(x)}}).join(' ')},'*');const old=console.log;console.log=(...a)=>{send(...a);old.apply(console,a)};console.error=(...a)=>send('ERROR:',...a);window.addEventListener('error',e=>send('ERROR:',e.message));const src="+js+";try{const s=document.createElement('script');s.textContent=src;document.body.appendChild(s)}catch(e){send('ERROR:',e.message)}})();<\/script>";
+ if(/<\/body\s*>/i.test(html)) html=html.replace(/<\/body\s*>/i,bridge+"</body>"); else html+=bridge;
+ return html;
+}
+function run(){capture();persist();showOutput("Preview refreshed. Console messages and runtime errors will appear here.");frame.srcdoc=buildDoc()}
+function openProject(id){
+ capture();persist();
+ const p=projects.find(item=>item.id===id);if(!p)return;
+ activeId=p.id;active="html";projectName.value=p.name;refreshProjectSelect();loadTab();run();
+ showOutput("Opened project: "+p.name);
+}
+window.addEventListener("message",e=>{if(e.source!==frame.contentWindow||!e.data||typeof e.data.gmLog!=="string")return;showOutput(output.textContent+"\n"+e.data.gmLog)});
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{capture();active=b.dataset.file;loadTab()}));
+editor.addEventListener("input",()=>{const p=activeProject();if(p)p.code[active]=editor.value;saveState.textContent="Unsaved changes"});
+projectName.addEventListener("input",()=>{saveState.textContent="Unsaved changes"});
+projectSelect.addEventListener("change",()=>openProject(projectSelect.value));
+document.querySelector("#runBtn").addEventListener("click",run);
+document.querySelector("#saveBtn").addEventListener("click",()=>{persist();showOutput("Saved locally in this browser.")});
+document.querySelector("#checkBtn").addEventListener("click",runDiagnostics);
+document.querySelector("#clearConsole").addEventListener("click",()=>{showOutput("Output cleared.");const summary=document.querySelector("#diagSummary");summary.textContent="";const pill=document.createElement("span");pill.className="diag-pill";pill.textContent="Cleared";summary.appendChild(pill);});
+document.querySelector("#newProject").addEventListener("click",()=>{
+ capture();persist();
+ const name=prompt("Name your new project","My new website");
+ if(name===null)return;
+ const clean=name.trim().slice(0,80)||"Untitled project";
+ const p={id:makeId(),name:clean,code:cloneDefaults()};
+ projects.push(p);activeId=p.id;active="html";projectName.value=p.name;refreshProjectSelect();loadTab();persist();run();showOutput("Created project: "+p.name);
+});
+document.querySelector("#renameProject").addEventListener("click",()=>{
+ const p=activeProject();if(!p)return;
+ const name=prompt("Enter a new name for this project",p.name);
+ if(name===null)return;
+ p.name=name.trim().slice(0,80)||p.name;projectName.value=p.name;persist();showOutput("Project renamed to: "+p.name);
+});
+document.querySelector("#deleteProject").addEventListener("click",()=>{
+ const p=activeProject();if(!p)return;
+ if(projects.length===1){showOutput("Keep at least one project. Create another project before deleting this one.");return}
+ if(!confirm('Delete "'+p.name+'"? This removes its saved copy from this browser.'))return;
+ projects=projects.filter(item=>item.id!==activeId);activeId=projects[0].id;active="html";projectName.value=activeProject().name;refreshProjectSelect();loadTab();persist();run();showOutput("Project deleted.");
+});
+document.querySelector("#resetBtn").addEventListener("click",()=>{if(!confirm("Replace this project's code with the starter demo?"))return;const p=activeProject();p.code=cloneDefaults();active="html";loadTab();persist();run();showOutput("Starter demo restored for this project.")});
+document.querySelector("#downloadBtn").addEventListener("click",()=>{capture();persist();const p=activeProject();const files={"index.html":p.code.html,"style.css":p.code.css,"script.js":p.code.js};const blob=new Blob([JSON.stringify({project:p.name,files},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"greenmind-project")+"-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showOutput("Export downloaded as JSON containing index.html, style.css and script.js contents.")});
+const aiConnection=document.querySelector("#aiConnection"), aiStatus=document.querySelector("#aiStatus"), aiAnswer=document.querySelector("#aiAnswer"), aiPrompt=document.querySelector("#aiPrompt"), aiPassword=document.querySelector("#aiAccessPassword"), askAiBtn=document.querySelector("#askAiBtn");
+async function checkAiBackend(){
+ try{
+  const r=await fetch("/api/health",{headers:{"Accept":"application/json"}});
+  if(!r.ok)throw new Error("Backend health check failed.");
+  const info=await r.json();
+  if(!info.accessConfigured){aiConnection.textContent="Backend needs setup";aiStatus.textContent="Set access password on server";return}
+  if(!info.aiConfigured){aiConnection.textContent="Backend online · AI not configured";aiStatus.textContent="Server needs OPENAI_API_KEY";return}
+  aiConnection.textContent="Backend ready · AI configured";aiStatus.textContent="Ready when access password is entered";
+ }catch(e){aiConnection.textContent="Backend unavailable";aiStatus.textContent="Open the hosted app served by GreenMind's Node backend"}
+}
+askAiBtn.addEventListener("click",async()=>{
+ const question=aiPrompt.value.trim();
+ if(!question){aiStatus.textContent="Enter a question first";aiAnswer.textContent="Write a question so the assistant knows what to help with.";return}
+ if(!aiPassword.value){aiStatus.textContent="Access password required";aiAnswer.textContent="Enter the private workspace access password configured on your backend. This is not your OpenAI API key.";return}
+ capture();persist();const p=activeProject();
+ const payload={mode:document.querySelector("#aiMode").value,question,projectName:p?.name||"Untitled",activeFile:fileNames[active],code:{html:p?.code.html||"",css:p?.code.css||"",js:p?.code.js||""}};
+ askAiBtn.disabled=true;askAiBtn.textContent="Thinking…";aiStatus.textContent="Contacting secure backend…";aiAnswer.textContent="Waiting for the configured AI service. This can take a little while.";
+ try{
+  const response=await fetch("/api/ai-chat",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json","X-GreenMind-Password":aiPassword.value},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({error:"The backend returned an unreadable response."}));
+  if(!response.ok)throw new Error(result.error||("Request failed with status "+response.status));
+  aiAnswer.textContent=result.answer||"The AI service returned no text.";aiStatus.textContent="Live AI response · "+(result.model||"configured model");
+ }catch(e){aiStatus.textContent="Request not completed";aiAnswer.textContent="GreenMind could not complete the AI request. "+e.message+"\n\nCheck that the app is served by the Node backend, both server secrets are configured, and the host allows outbound HTTPS. No demo answer was substituted."}
+ finally{askAiBtn.disabled=false;askAiBtn.textContent="Ask GreenMind AI"}
+});
+document.querySelector("#clearAiBtn").addEventListener("click",()=>{aiPrompt.value="";aiAnswer.textContent="Answer cleared.";aiStatus.textContent="Ready"});
+aiConnection.textContent = "Optional · Paused";
+aiStatus.textContent = "AI is paused; Code Lab works without it.";
+aiAnswer.textContent =
+  "GreenMind AI is temporarily paused. Your editor, preview, diagnostics, projects, saving, and export continue to work.";
+
+document.querySelector("#aiCard")
+  .querySelectorAll("input, select, textarea, button")
+  .forEach(el => {
+    if (el.id !== "clearAiBtn") el.disabled = true;
+  });
+
+try{
+ const saved=JSON.parse(localStorage.getItem(key)||"null");
+ if(saved&&Array.isArray(saved.projects)&&saved.projects.length){projects=saved.projects.filter(p=>p&&p.id&&p.name&&p.code).map(p=>({id:String(p.id),name:String(p.name),code:{...cloneDefaults(),...p.code}}));activeId=projects.some(p=>p.id===saved.activeId)?saved.activeId:(projects[0]?.id||"")}
+ if(!projects.length){
+  const legacy=JSON.parse(localStorage.getItem(legacyKey)||"null");
+  const p={id:makeId(),name:legacy?.name||"My first website",code:{...cloneDefaults(),...(legacy?.code||{})}};
+  projects=[p];activeId=p.id;
+ }
+}catch(e){projects=[{id:makeId(),name:"My first website",code:cloneDefaults()}];activeId=projects[0].id}
+projectName.value=activeProject().name;refreshProjectSelect();loadTab();run();
+})();</script>
+</body>
+</html>

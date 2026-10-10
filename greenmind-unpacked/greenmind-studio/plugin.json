@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "greenmind-studio",
+  "version": "0.1.0",
+  "description": "A local-first coding workspace for creating, organizing, and checking small web projects.",
+  "author": { "name": "GreenMind Studio" },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "GreenMind Studio",
+        "shortDescription": "Local-first Code Lab",
+        "longDescription": "Create and organize web project files in a scoped local workspace, inspect files, and run safe JavaScript syntax checks. Requires a compatible local MCP host and Node.js.",
+        "developerName": "GreenMind Studio",
+        "category": "Developer tools",
+        "capabilities": ["Code", "Files"],
+        "defaultPrompt": [
+          "Open GreenMind Studio Code Lab and help me build and test a web project.",
+          "Review my JavaScript for syntax errors and explain the fixes.",
+          "Organize my project files and suggest the next development step."
+        ]
+      }
+    }
+  }
+}
