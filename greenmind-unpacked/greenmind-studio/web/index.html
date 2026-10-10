@@ -33,7 +33,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 25px
   <select id="projectSelect" aria-label="Open project"></select>
   <label for="projectName" style="margin-top:10px">Project name</label>
   <div class="projectrow"><input id="projectName" value="My first website" maxlength="80"><button id="renameProject">Rename</button></div>
-  <div class="actions" style="margin-top:10px"><button class="primary" id="newProject">＋ New project</button><button id="deleteProject">Delete project</button></div>
+  <div class="actions" style="margin-top:10px"><button class="primary" id="newProject">＋ New project</button><button id="duplicateProject">Duplicate project</button><button id="deleteProject">Delete project</button></div>
   <div class="actions" style="margin-top:10px"><button class="primary" id="runBtn">▶ Run preview</button><button id="saveBtn">Save</button><button id="downloadBtn">Export files</button><button id="resetBtn">Reset demo</button></div>
   <p class="hint">Your drafts are saved in this browser on this device. Export files before clearing browser data or changing devices.</p>
  </div>
@@ -190,7 +190,21 @@ document.querySelector("#newProject").addEventListener("click",()=>{
  const p={id:makeId(),name:clean,code:cloneDefaults()};
  projects.push(p);activeId=p.id;active="html";projectName.value=p.name;refreshProjectSelect();loadTab();persist();run();showOutput("Created project: "+p.name);
 });
-document.querySelector("#renameProject").addEventListener("click",()=>{
+document.querySelector("#duplicateProject").addEventListener("click",()=>{
+   const source=activeProject();if(!source)return;
+   capture();persist();
+   const copy={
+    id:makeId(),
+    name:(source.name+" copy").slice(0,80),
+    code:{html:source.code.html,css:source.code.css,js:source.code.js}
+   };
+   projects.push(copy);
+   activeId=copy.id;active="html";projectName.value=copy.name;
+   refreshProjectSelect();loadTab();persist();run();
+   showOutput("Duplicated project: "+source.name+" → "+copy.name);
+  });
+
+  document.querySelector("#renameProject").addEventListener("click",()=>{
  const p=activeProject();if(!p)return;
  const name=prompt("Enter a new name for this project",p.name);
  if(name===null)return;
