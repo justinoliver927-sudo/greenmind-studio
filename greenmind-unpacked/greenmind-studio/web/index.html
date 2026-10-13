@@ -132,28 +132,39 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 25px
     <div class="cardhead">
       <h2>Modify Files</h2>
       <button id="backToStudioBtn">← Back to Studio</button>
-    </div>
+    </div><div class="cardbody">
+  <p class="page-intro">
+    Edit the active project's HTML, CSS and JavaScript.
+    Your changes stay linked to the selected project.
+  </p>
 
-    <div class="cardbody">
-      <p class="page-intro">
-        Edit the active project's HTML, CSS and JavaScript.
-        Your changes stay linked to the selected project.
-      </p>
+  <label for="modifyProjectSelect">Active project</label>
+  <select id="modifyProjectSelect"></select>
 
-      <label for="modifyProjectSelect">Active project</label>
-      <select id="modifyProjectSelect"></select>
+  <div class="actions" style="margin-top:12px">
+    <button class="primary" id="modifySaveBtn">Save changes</button>
+    <button id="modifyRunBtn">Run preview</button>
+    <button id="modifyCheckBtn">Run diagnostics</button>
+  </div>
 
-      <div class="actions" style="margin-top:12px">
-        <button class="primary" id="modifySaveBtn">Save changes</button>
-        <button id="modifyRunBtn">Run preview</button>
-        <button id="modifyCheckBtn">Run diagnostics</button>
-      </div>
+  <p class="hint">
+    Save your work before leaving this page.
+    Export your project regularly as a backup.
+  </p>
+</div>
 
-      <p class="hint">
-        Save your work before leaving this page.
-        Export your project regularly as a backup.
-      </p>
-    </div>
+  </section>  <section class="card previewcard">
+    <div class="cardhead">
+      <h2>Live Preview</h2>
+      <span class="status">Sandboxed frame</span>
+    </div><div class="cardbody">
+  <p class="hint">
+    Your project preview is displayed below. Tap Run preview
+    after editing your files to refresh it.
+  </p>
+  <div id="modifyPreviewSlot"></div>
+</div>
+
   </section>
 </main>
 <footer>GREENMIND STUDIO · BUILD SMALL · TEST HONESTLY</footer>
@@ -169,6 +180,8 @@ const editor=document.querySelector("#editor"), fileLabel=document.querySelector
 const studioMain = document.querySelector("#studioMain");
 const modifyMain = document.querySelector("#modifyMain");
 const editorCard = document.querySelector(".editorcard");
+const previewCard = document.querySelector(".previewcard");
+const modifyPreviewSlot = document.querySelector("#modifyPreviewSlot");
 const menuBtn = document.querySelector("#menuBtn");
 const studioMenu = document.querySelector("#studioMenu");
 const modifyProjectSelect =
@@ -191,12 +204,15 @@ function showStudioPage() {
   capture();
   persist();
 
+  studioMain.appendChild(editorCard);
+  studioMain.appendChild(previewCard);
+
   modifyMain.hidden = true;
   studioMain.hidden = false;
-  studioMain.appendChild(editorCard);
 
   studioMenu.hidden = true;
   menuBtn.setAttribute("aria-expanded", "false");
+
   window.scrollTo(0, 0);
 }
 
@@ -205,10 +221,13 @@ function showModifyPage() {
   persist();
 
   refreshModifyProjects();
+
   modifyMain.appendChild(editorCard);
+  modifyPreviewSlot.appendChild(previewCard);
 
   studioMain.hidden = true;
   modifyMain.hidden = false;
+
   studioMenu.hidden = true;
   menuBtn.setAttribute("aria-expanded", "false");
 
