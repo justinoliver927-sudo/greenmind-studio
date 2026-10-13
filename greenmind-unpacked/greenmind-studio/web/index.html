@@ -141,6 +141,38 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 25px
   <label for="modifyProjectSelect">Active project</label>
   <select id="modifyProjectSelect"></select>
 
+  <div class="card" style="margin-top:14px">
+    <div class="cardhead">
+      <h2>Project File Manager</h2>
+      <span class="pill">Local files</span>
+    </div>
+    <div class="cardbody">
+      <label for="projectMode">Project mode</label>
+      <select id="projectMode">
+        <option value="multi">Multi-file project</option>
+        <option value="single">Single-file project</option>
+      </select>
+
+      <label for="managedFileSelect" style="margin-top:12px">Project files</label>
+      <select id="managedFileSelect"></select>
+
+      <label for="newFileName" style="margin-top:12px">New file name</label>
+      <input id="newFileName" maxlength="100"
+        placeholder="Example: about.html">
+
+      <div class="actions" style="margin-top:10px">
+        <button class="primary" id="createFileBtn">＋ Create file</button>
+        <button id="renameFileBtn">Rename file</button>
+        <button id="deleteFileBtn">Delete file</button>
+      </div>
+
+      <p class="hint">
+        Core files will be protected. Save your project regularly.
+        Changes remain in this browser until exported or backed up.
+      </p>
+    </div>
+  </div>
+
   <div class="actions" style="margin-top:12px">
     <button class="primary" id="modifySaveBtn">Save changes</button>
     <button id="modifyRunBtn">Run preview</button>
