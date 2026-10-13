@@ -219,6 +219,183 @@ const studioMenu = document.querySelector("#studioMenu");
 const modifyProjectSelect =
   document.querySelector("#modifyProjectSelect");
 
+
+const projectMode = document.querySelector("#projectMode");
+const managedFileSelect = document.querySelector("#managedFileSelect");
+const newFileName = document.querySelector("#newFileName");
+
+let activeExtraFile = null;
+
+function refreshManagedFiles() {
+  const p = activeProject();
+  if (!p) return;
+
+  if (!p.extraFiles) p.extraFiles = {};
+
+  managedFileSelect.innerHTML = "";
+
+  const files = [
+    "index.html",
+    ...(projectMode.value === "single"
+      ? []
+      : ["style.css", "script.js", ...Object.keys(p.extraFiles)])
+  ];
+
+  files.forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    managedFileSelect.appendChild(option);
+  });
+
+  managedFileSelect.value =
+    activeExtraFile || fileNames[active] || "index.html";
+}
+
+function openManagedFile() {
+  const name = managedFileSelect.value;
+  const p = activeProject();
+  if (!p) return;
+
+  capture();
+
+  if (name === "index.html") {
+    activeExtraFile = null;
+    active = "html";
+    loadTab();
+  } else if (name === "style.css") {
+    activeExtraFile = null;
+    active = "css";
+    loadTab();
+  } else if (name === "script.js") {
+    activeExtraFile = null;
+    active = "js";
+    loadTab();
+  } else if (Object.prototype.hasOwnProperty.call(p.extraFiles || {}, name)) {
+    activeExtraFile = name;
+    editor.value = p.extraFiles[name];
+    fileLabel.textContent = name;
+    document.querySelectorAll(".tab").forEach(tab =>
+      tab.setAttribute("aria-selected", "false")
+    );
+  }
+}
+
+function createManagedFile() {
+  const p = activeProject();
+  if (!p) return;
+
+  const name = newFileName.value.trim();
+
+  if (!/^[a-zA-Z0-9_-]+\.(html|css|js)$/i.test(name)) {
+    showOutput("Enter a filename ending in .html, .css, or .js.");
+    return;
+  }
+
+  if (["index.html", "style.css", "script.js"].includes(name) ||
+      Object.prototype.hasOwnProperty.call(p.extraFiles || {}, name)) {
+    showOutput("That filename already exists or is reserved.");
+    return;
+  }
+
+  if (projectMode.value === "single") {
+    showOutput("Switch to Multi-file project to add files.");
+    return;
+  }
+
+  if (!p.extraFiles) p.extraFiles = {};
+  p.extraFiles[name] = "";
+
+  activeExtraFile = name;
+  editor.value = "";
+  fileLabel.textContent = name;
+  newFileName.value = "";
+
+  document.querySelectorAll(".tab").forEach(tab =>
+    tab.setAttribute("aria-selected", "false")
+  );
+
+  persist();
+  refreshManagedFiles();
+  managedFileSelect.value = name;
+  showOutput("Created " + name + ". Add your code and save.");
+}
+
+function renameManagedFile() {
+  const p = activeProject();
+  const oldName = managedFileSelect.value;
+
+  if (!p || !p.extraFiles ||
+      !Object.prototype.hasOwnProperty.call(p.extraFiles, oldName)) {
+    showOutput("The three core files cannot be renamed.");
+    return;
+  }
+
+  const name = newFileName.value.trim();
+
+  if (!/^[a-zA-Z0-9_-]+\.(html|css|js)$/i.test(name) ||
+      ["index.html", "style.css", "script.js"].includes(name) ||
+      Object.prototype.hasOwnProperty.call(p.extraFiles, name)) {
+    showOutput("Enter a valid, unused filename.");
+    return;
+  }
+
+  capture();
+  p.extraFiles[name] = p.extraFiles[oldName];
+  delete p.extraFiles[oldName];
+  activeExtraFile = name;
+  fileLabel.textContent = name;
+  newFileName.value = "";
+
+  persist();
+  refreshManagedFiles();
+  managedFileSelect.value = name;
+  showOutput("Renamed file to " + name + ".");
+}
+
+function deleteManagedFile() {
+  const p = activeProject();
+  const name = managedFileSelect.value;
+
+  if (!p || !p.extraFiles ||
+      !Object.prototype.hasOwnProperty.call(p.extraFiles, name)) {
+    showOutput("Core files are protected and cannot be deleted.");
+    return;
+  }
+
+  if (!confirm('Delete "' + name + '" from this project?')) return;
+
+  delete p.extraFiles[name];
+  activeExtraFile = null;
+  active = "html";
+  loadTab();
+  persist();
+  refreshManagedFiles();
+  managedFileSelect.value = "index.html";
+  showOutput("Deleted " + name + ".");
+}
+
+managedFileSelect.addEventListener("change", openManagedFile);
+
+projectMode.addEventListener("change", () => {
+  if (projectMode.value === "single") {
+    activeExtraFile = null;
+    active = "html";
+    loadTab();
+  }
+  refreshManagedFiles();
+});
+
+document.querySelector("#createFileBtn")
+  .addEventListener("click", createManagedFile);
+
+document.querySelector("#renameFileBtn")
+  .addEventListener("click", renameManagedFile);
+
+document.querySelector("#deleteFileBtn")
+  .addEventListener("click", deleteManagedFile);
+
+
 function refreshModifyProjects() {
   modifyProjectSelect.innerHTML = "";
 
@@ -365,8 +542,54 @@ function runDiagnostics(){
  showOutput(lines.join("\n"));
 }
 function refreshProjectSelect(){projectSelect.innerHTML="";projects.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;projectSelect.appendChild(o)});projectSelect.value=activeId}
-function loadTab(){const p=activeProject();if(!p)return;editor.value=p.code[active];fileLabel.textContent=fileNames[active];document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.file===active)))}
-function capture(){const p=activeProject();if(p)p.code[active]=editor.value}
+
+function loadTab() {
+  const p = activeProject();
+  if (!p) return;
+
+  if (!p.extraFiles) p.extraFiles = {};
+
+  if (
+    activeExtraFile &&
+    Object.prototype.hasOwnProperty.call(p.extraFiles, activeExtraFile)
+  ) {
+    editor.value = p.extraFiles[activeExtraFile];
+    fileLabel.textContent = activeExtraFile;
+
+    document.querySelectorAll(".tab").forEach(tab =>
+      tab.setAttribute("aria-selected", "false")
+    );
+    return;
+  }
+
+  activeExtraFile = null;
+  editor.value = p.code[active];
+  fileLabel.textContent = fileNames[active];
+
+  document.querySelectorAll(".tab").forEach(tab =>
+    tab.setAttribute(
+      "aria-selected",
+      String(tab.dataset.file === active)
+    )
+  );
+}
+
+function capture() {
+  const p = activeProject();
+  if (!p) return;
+
+  if (!p.extraFiles) p.extraFiles = {};
+
+  if (
+    activeExtraFile &&
+    Object.prototype.hasOwnProperty.call(p.extraFiles, activeExtraFile)
+  ) {
+    p.extraFiles[activeExtraFile] = editor.value;
+  } else {
+    p.code[active] = editor.value;
+  }
+}
+
 function persist(){
  capture();
  const p=activeProject();
@@ -404,7 +627,12 @@ function openProject(id){
 }
 window.addEventListener("message",e=>{if(e.source!==frame.contentWindow||!e.data||typeof e.data.gmLog!=="string")return;showOutput(output.textContent+"\n"+e.data.gmLog)});
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{capture();active=b.dataset.file;loadTab()}));
-editor.addEventListener("input",()=>{const p=activeProject();if(p)p.code[active]=editor.value;saveState.textContent="Unsaved changes"});
+
+editor.addEventListener("input", () => {
+  capture();
+  saveState.textContent = "Unsaved changes";
+});
+
 projectName.addEventListener("input",()=>{saveState.textContent="Unsaved changes"});
 projectSelect.addEventListener("change",()=>openProject(projectSelect.value));
 document.querySelector("#runBtn").addEventListener("click",run);
@@ -485,14 +713,59 @@ document.querySelector("#aiCard")
     if (el.id !== "clearAiBtn") el.disabled = true;
   });
 
-try{
- const saved=JSON.parse(localStorage.getItem(key)||"null");
- if(saved&&Array.isArray(saved.projects)&&saved.projects.length){projects=saved.projects.filter(p=>p&&p.id&&p.name&&p.code).map(p=>({id:String(p.id),name:String(p.name),code:{...cloneDefaults(),...p.code}}));activeId=projects.some(p=>p.id===saved.activeId)?saved.activeId:(projects[0]?.id||"")}
- if(!projects.length){
-  const legacy=JSON.parse(localStorage.getItem(legacyKey)||"null");
-  const p={id:makeId(),name:legacy?.name||"My first website",code:{...cloneDefaults(),...(legacy?.code||{})}};
-  projects=[p];activeId=p.id;
- }
+
+try {
+  const saved = JSON.parse(localStorage.getItem(key) || "null");
+
+  if (saved && Array.isArray(saved.projects)) {
+    projects = saved.projects
+      .filter(p => p && p.id && p.name && p.code)
+      .map(p => ({
+        id: String(p.id),
+        name: String(p.name),
+        code: { ...cloneDefaults(), ...p.code },
+        extraFiles:
+          p.extraFiles &&
+          typeof p.extraFiles === "object" &&
+          !Array.isArray(p.extraFiles)
+            ? { ...p.extraFiles }
+            : {}
+      }));
+
+    activeId = projects.some(p => p.id === saved.activeId)
+      ? saved.activeId
+      : (projects[0]?.id || "");
+  }
+
+  if (!projects.length) {
+    const legacy = JSON.parse(
+      localStorage.getItem(legacyKey) || "null"
+    );
+
+    const p = {
+      id: makeId(),
+      name: legacy?.name || "My first website",
+      code: {
+        ...cloneDefaults(),
+        ...(legacy?.code || {})
+      },
+      extraFiles: {}
+    };
+
+    projects = [p];
+    activeId = p.id;
+  }
+} catch (e) {
+  projects = [{
+    id: makeId(),
+    name: "My first website",
+    code: cloneDefaults(),
+    extraFiles: {}
+  }];
+
+  activeId = projects[0].id;
+}
+
 }catch(e){projects=[{id:makeId(),name:"My first website",code:cloneDefaults()}];activeId=projects[0].id}
 projectName.value=activeProject().name;refreshProjectSelect();loadTab();run();
 })();</script>
